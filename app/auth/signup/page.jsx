@@ -1,54 +1,76 @@
-import { redirect } from 'next/navigation'
-import { createClient, createAdminClientServer } from '@/lib/supabase/server'
+'use client'
+
+import { useState } from 'react'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
 
-export default async function SignupPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+export default function SignupPage() {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
+  const [formData, setFormData] = useState({
+    nome_clinica: '',
+    email: '',
+    password: '',
+    password_confirm: ''
+  })
 
-  if (user) redirect('/dashboard')
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
 
-  async function handleSignup(formData) {
-    'use server'
+  const handleSignup = async (e) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+
     try {
-      const nome_clinica = formData.get('nome_clinica')
-      const email = formData.get('email')
-      const password = formData.get('password')
-      const password_confirm = formData.get('password_confirm')
+      const { nome_clinica, email, password, password_confirm } = formData
 
       if (password !== password_confirm) {
-        return { error: 'Senhas não coincidem' }
+        setError('Senhas não coincidem')
+        setLoading(false)
+        return
+      }
+
+      if (password.length < 6) {
+        setError('Senha deve ter no mínimo 6 caracteres')
+        setLoading(false)
+        return
       }
 
       const supabase = await createClient()
-      const admin = createAdminClientServer()
 
-      // Criar conta de autenticação
+      // 1. Criar conta de autenticação
       const { data: authData, error: authError } = await supabase.auth.signUpWithPassword({
         email,
         password,
       })
 
       if (authError) {
-        return { error: authError.message }
+        setError('Erro de autenticação: ' + authError.message)
+        setLoading(false)
+        return
       }
 
-      // Criar clínica com SERVICE_ROLE
-      const { data: clinica, error: clinicaError } = await admin
+      // 2. Criar clínica
+      const { data: clinicaData, error: clinicaError } = await supabase
         .from('clinicas')
         .insert([{ nome: nome_clinica }])
         .select()
         .single()
 
       if (clinicaError) {
-        return { error: 'Erro ao criar clínica: ' + clinicaError.message }
+        setError('Erro ao criar clínica: ' + clinicaError.message)
+        setLoading(false)
+        return
       }
 
-      // Criar perfil de admin com SERVICE_ROLE
-      const { error: perfilError } = await admin
+      // 3. Criar perfil de admin
+      const { error: perfilError } = await supabase
         .from('perfis')
         .insert([{
-          clinica_id: clinica.id,
+          clinica_id: clinicaData.id,
           user_id: authData.user.id,
           nome: email.split('@')[0],
           email,
@@ -56,13 +78,35 @@ export default async function SignupPage() {
         }])
 
       if (perfilError) {
-        return { error: 'Erro ao criar perfil: ' + perfilError.message }
+        setError('Erro ao criar perfil: ' + perfilError.message)
+        setLoading(false)
+        return
       }
 
-      redirect('/dashboard')
+      // 4. Login automático
+      const { error: loginError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (loginError) {
+        setError('Erro ao fazer login: ' + loginError.message)
+        setLoading(false)
+        return
+      }
+
+      setSuccess(true)
+      setError('')
+
+      // Redirecionar após 2s
+      setTimeout(() => {
+        window.location.href = '/dashboard'
+      }, 2000)
+
     } catch (err) {
       console.error('Signup error:', err)
-      return { error: 'Erro no servidor: ' + (err?.message || 'desconhecido') }
+      setError('Erro: ' + (err?.message || 'desconhecido'))
+      setLoading(false)
     }
   }
 
@@ -74,14 +118,29 @@ export default async function SignupPage() {
           <p className="text-gray-600 mt-2">Criar nova conta</p>
         </div>
 
-        <form action={handleSignup} className="space-y-6">
+        {success && (
+          <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+            ✅ Conta criada com sucesso! Redirecionando...
+          </div>
+        )}
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
+            ❌ {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSignup} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700">Nome da Clínica</label>
             <input
               type="text"
               name="nome_clinica"
+              value={formData.nome_clinica}
+              onChange={handleChange}
               required
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              disabled={loading}
+              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
               placeholder="Clínica Odonto Plus"
             />
           </div>
@@ -91,8 +150,11 @@ export default async function SignupPage() {
             <input
               type="email"
               name="email"
+              value={formData.email}
+              onChange={handleChange}
               required
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              disabled={loading}
+              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
               placeholder="seu@email.com"
             />
           </div>
@@ -102,8 +164,11 @@ export default async function SignupPage() {
             <input
               type="password"
               name="password"
+              value={formData.password}
+              onChange={handleChange}
               required
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              disabled={loading}
+              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
               placeholder="••••••••"
             />
           </div>
@@ -113,17 +178,21 @@ export default async function SignupPage() {
             <input
               type="password"
               name="password_confirm"
+              value={formData.password_confirm}
+              onChange={handleChange}
               required
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              disabled={loading}
+              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
               placeholder="••••••••"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white font-medium py-2 rounded-lg hover:bg-blue-700 transition"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white font-medium py-2 rounded-lg hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            Criar Conta
+            {loading ? 'Criando conta...' : 'Criar Conta'}
           </button>
         </form>
 

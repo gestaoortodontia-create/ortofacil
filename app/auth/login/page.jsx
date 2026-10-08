@@ -1,29 +1,62 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+'use client'
+
+import { useState } from 'react'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
 
-export default async function LoginPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+export default function LoginPage() {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  })
 
-  if (user) redirect('/dashboard')
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
 
-  async function handleLogin(formData) {
-    'use server'
-    const email = formData.get('email')
-    const password = formData.get('password')
-    const supabase = await createClient()
+  const handleLogin = async (e) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    try {
+      const { email, password } = formData
 
-    if (error) {
-      return { error: error.message }
+      if (!email || !password) {
+        setError('Email e senha são obrigatórios')
+        setLoading(false)
+        return
+      }
+
+      const supabase = await createClient()
+
+      const { error: loginError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (loginError) {
+        setError('Email ou senha inválidos')
+        setLoading(false)
+        return
+      }
+
+      setSuccess(true)
+      setError('')
+
+      // Redirecionar após 2s
+      setTimeout(() => {
+        window.location.href = '/dashboard'
+      }, 2000)
+
+    } catch (err) {
+      console.error('Login error:', err)
+      setError('Erro ao fazer login: ' + (err?.message || 'desconhecido'))
+      setLoading(false)
     }
-
-    redirect('/dashboard')
   }
 
   return (
@@ -34,14 +67,29 @@ export default async function LoginPage() {
           <p className="text-gray-600 mt-2">Sistema de Gestão Ortodôntica</p>
         </div>
 
-        <form action={handleLogin} className="space-y-6">
+        {success && (
+          <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+            ✅ Login realizado com sucesso! Redirecionando...
+          </div>
+        )}
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
+            ❌ {error}
+          </div>
+        )}
+
+        <form onSubmit={handleLogin} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700">Email</label>
             <input
               type="email"
               name="email"
+              value={formData.email}
+              onChange={handleChange}
               required
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              disabled={loading}
+              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
               placeholder="seu@email.com"
             />
           </div>
@@ -51,17 +99,21 @@ export default async function LoginPage() {
             <input
               type="password"
               name="password"
+              value={formData.password}
+              onChange={handleChange}
               required
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              disabled={loading}
+              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
               placeholder="••••••••"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white font-medium py-2 rounded-lg hover:bg-blue-700 transition"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white font-medium py-2 rounded-lg hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            Entrar
+            {loading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
 
