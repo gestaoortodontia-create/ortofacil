@@ -21,7 +21,7 @@ const CAMPOS_CLINICA = [
 const CAMPOS_PROFISSIONAL = [
   { name: 'nome', label: 'Nome', required: true, full: true },
   { name: 'especialidade', label: 'Especialidade', type: 'select', options: ['Ortodontia', 'Clínica geral', 'Endodontia', 'Implantodontia', 'Periodontia', 'Prótese', 'Odontopediatria', 'Cirurgia', 'Estética', 'Harmonização orofacial'] },
-  { name: 'cro', label: 'CRO', placeholder: 'Ex.: CRO-SP 12345' },
+  { name: 'cro', label: 'CRO', placeholder: 'Ex.: SP 12345' },
   { name: 'telefone', label: 'Telefone', type: 'tel' },
   { name: 'email', label: 'E-mail', type: 'email' },
   { name: 'ativo', label: 'Situação', type: 'checkbox', checkboxLabel: 'Ativo (aparece na agenda)', default: true },

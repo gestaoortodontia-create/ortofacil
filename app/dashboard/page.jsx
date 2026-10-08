@@ -10,6 +10,8 @@ import StatusBadge from '@/components/StatusBadge'
 import { STATUS_AGENDA } from '@/lib/opcoes'
 import { addDays, data, hora, isoDate, moeda } from '@/lib/format'
 
+const primeiroNome = (nome) => (nome || '').split(/\s+/).find((p) => p && !/^(dr|dra|sr|sra)\.?$/i.test(p)) || ''
+
 export default function PainelPage() {
   const { clinica, perfil } = useClinica()
   const [d, setD] = useState(null)
@@ -45,7 +47,7 @@ export default function PainelPage() {
 
   return (
     <div>
-      <PageHeader title={`${saudacao}${perfil.nome ? `, ${perfil.nome.split(' ')[0]}` : ''}!`} subtitle={new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}>
+      <PageHeader title={`${saudacao}${primeiroNome(perfil.nome) ? `, ${primeiroNome(perfil.nome)}` : ''}!`} subtitle={new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}>
         <Link href="/dashboard/agenda" className="btn-primary"><CalendarDays className="h-4 w-4" /> Abrir agenda</Link>
       </PageHeader>
 

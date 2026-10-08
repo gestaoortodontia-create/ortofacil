@@ -161,7 +161,7 @@ export default function PacientePage({ params }) {
       )}
 
       {tab === 'prescricoes' && (
-        <CrudPage embedded table="prescricoes" singular="prescrição" select="*, profissionais(nome)"
+        <CrudPage embedded table="prescricoes" singular="prescrição" feminino select="*, profissionais(nome)"
           fields={camposPrescricao}
           columns={COLS_PRESCRICAO} order={ORDEM_DATA} query={porPaciente} beforeSave={comPaciente} searchFields={['medicamento']} />
       )}

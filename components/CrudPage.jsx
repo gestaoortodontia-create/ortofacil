@@ -15,6 +15,7 @@ export default function CrudPage({
   title,
   subtitle,
   singular,
+  feminino = false,
   fields,
   columns,
   select = '*',
@@ -30,6 +31,7 @@ export default function CrudPage({
   emptyText,
 }) {
   const { clinica } = useClinica()
+  const g = feminino ? { novo: 'Nova', este: 'esta', nenhum: 'Nenhuma', cadastrado: 'cadastrada' } : { novo: 'Novo', este: 'este', nenhum: 'Nenhum', cadastrado: 'cadastrado' }
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -71,7 +73,7 @@ export default function CrudPage({
   }
 
   const remove = async (row) => {
-    if (!window.confirm(`Excluir este ${singular}? Esta ação não pode ser desfeita.`)) return
+    if (!window.confirm(`Excluir ${g.este} ${singular}? Esta ação não pode ser desfeita.`)) return
     const { error } = await createClient().from(table).delete().eq('id', row.id)
     if (error) setError(traduzErro(error))
     else load()
@@ -79,7 +81,7 @@ export default function CrudPage({
 
   const novoBtn = (
     <button onClick={() => setEditing({})} className="btn-primary">
-      <Plus className="h-4 w-4" /> Novo {singular}
+      <Plus className="h-4 w-4" /> {g.novo} {singular}
     </button>
   )
 
@@ -111,7 +113,7 @@ export default function CrudPage({
         {loading ? (
           <Spinner />
         ) : filtered.length === 0 ? (
-          <EmptyState title={busca ? 'Nenhum resultado para a busca' : `Nenhum ${singular} cadastrado`} text={!busca ? emptyText : undefined} />
+          <EmptyState title={busca ? 'Nenhum resultado para a busca' : `${g.nenhum} ${singular} ${g.cadastrado}`} text={!busca ? emptyText : undefined} />
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-slate-200">
@@ -148,7 +150,7 @@ export default function CrudPage({
         )}
       </div>
 
-      <Modal open={!!editing} title={editing?.id ? `Editar ${singular}` : `Novo ${singular}`} onClose={() => setEditing(null)}>
+      <Modal open={!!editing} title={editing?.id ? `Editar ${singular}` : `${g.novo} ${singular}`} onClose={() => setEditing(null)}>
         {editing && <RecordForm fields={fields} initial={editing} onSubmit={save} onCancel={() => setEditing(null)} />}
       </Modal>
     </div>

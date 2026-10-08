@@ -187,7 +187,7 @@ export default function FinanceiroPage() {
       <Tabs tabs={[{ id: 'receber', label: 'Contas a receber' }, { id: 'recebimentos', label: 'Recebimentos' }, { id: 'pagar', label: 'Contas a pagar' }]} active={tab} onChange={setTab} />
 
       {tab === 'receber' && (
-        <CrudPage embedded table="contas_receber" singular="conta a receber" select="*, pacientes(nome)" fields={CAMPOS_RECEBER} columns={COLS_RECEBER}
+        <CrudPage embedded table="contas_receber" singular="conta a receber" feminino select="*, pacientes(nome)" fields={CAMPOS_RECEBER} columns={COLS_RECEBER}
           order={ORDEM_VENC} searchFields={['descricao']} afterSave={atualizar} reloadKey={reload}
           rowActions={(c) => ['aberto', 'parcial'].includes(c.status) && (
             <button onClick={() => setPagando(c)} className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-50"><HandCoins className="h-3.5 w-3.5" /> Receber</button>
@@ -195,7 +195,7 @@ export default function FinanceiroPage() {
       )}
       {tab === 'recebimentos' && <Recebimentos reloadKey={reload} />}
       {tab === 'pagar' && (
-        <CrudPage embedded table="contas_pagar" singular="conta a pagar" fields={CAMPOS_PAGAR} columns={COLS_PAGAR}
+        <CrudPage embedded table="contas_pagar" singular="conta a pagar" feminino fields={CAMPOS_PAGAR} columns={COLS_PAGAR}
           order={ORDEM_VENC} searchFields={['fornecedor', 'descricao']} afterSave={atualizar}
           rowActions={(c, recarregar) => c.status === 'aberto' && (
             <button onClick={() => marcarPaga(c, recarregar)} className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-50"><CheckCircle2 className="h-3.5 w-3.5" /> Pagar</button>

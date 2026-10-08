@@ -54,7 +54,7 @@ function NovoContrato({ onClose, onSaved }) {
       'paciente.nome': paciente?.nome, 'paciente.cpf': paciente?.cpf, 'paciente.endereco': paciente?.endereco,
       'paciente.data_nascimento': paciente?.data_nascimento && data(paciente.data_nascimento),
       'responsavel.nome': paciente?.responsavel_nome || 'não se aplica', 'responsavel.cpf': paciente?.responsavel_cpf || '—',
-      'profissional.nome': prof?.nome, 'profissional.cro': prof?.cro,
+      'profissional.nome': prof?.nome, 'profissional.cro': prof?.cro?.replace(/^CRO[\s-]*/i, ''),
       tratamento: f.tratamento, valor_total: f.valor_total && moeda(f.valor_total), forma_pagamento: f.forma_pagamento,
       valor_manutencao: f.valor_manutencao && moeda(f.valor_manutencao), prazo_estimado: f.prazo_estimado,
       data: new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' }),

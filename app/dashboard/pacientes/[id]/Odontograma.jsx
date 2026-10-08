@@ -55,7 +55,7 @@ export default function Odontograma({ pacienteId, clinicaId }) {
       type="button"
       onClick={() => setSel(n)}
       title={ESTADOS.find((e) => e.value === dentes[n]?.estado)?.label || 'Hígido'}
-      className={`flex h-12 w-9 flex-col items-center justify-center rounded-md border-2 text-xs font-semibold transition sm:w-10
+      className={`flex h-11 w-8 flex-col items-center justify-center rounded-md border-2 text-xs font-semibold transition
         ${estilo(dentes[n]?.estado)} ${sel === n ? 'ring-2 ring-brand-400 ring-offset-1' : ''}`}
     >
       {n}
@@ -64,8 +64,8 @@ export default function Odontograma({ pacienteId, clinicaId }) {
   )
 
   return (
-    <div className="grid gap-6 lg:grid-cols-3">
-      <div className="card overflow-x-auto p-6 lg:col-span-2">
+    <div className="grid gap-6 xl:grid-cols-3">
+      <div className="card overflow-x-auto p-6 xl:col-span-2">
         <div className="mx-auto w-fit space-y-6">
           {ARCADAS.map((arcada, i) => (
             <div key={i} className="flex gap-3">

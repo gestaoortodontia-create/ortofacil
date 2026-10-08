@@ -138,7 +138,7 @@ export default function AgendaPage() {
         <div className="space-y-6">
           {Object.entries(grupos).map(([d, lista]) => (
             <section key={d}>
-              <h2 className="mb-2 text-sm font-semibold capitalize text-slate-600">{tituloDia(d)} <span className="font-normal text-slate-400">· {lista.length} consulta(s)</span></h2>
+              <h2 className="mb-2 text-sm font-semibold text-slate-600"><span className="inline-block first-letter:uppercase">{tituloDia(d)}</span> <span className="font-normal text-slate-400">· {lista.length} consulta(s)</span></h2>
               <div className="card divide-y divide-slate-100">
                 {lista.map((a) => {
                   const st = statusInfo(STATUS_AGENDA, a.status)

@@ -64,7 +64,7 @@ function Manutencoes({ plano }) {
   const comPlano = useCallback((p) => ({ ...p, plano_orto_id: plano.id }), [plano.id])
   const [campos] = useState(() => CAMPOS_MANUTENCAO.map((f) => (f.name === 'data' ? { ...f, default: agoraLocal().slice(0, 16) } : f)))
   return (
-    <CrudPage embedded table="manutencoes_orto" singular="manutenção" fields={campos} columns={COLUNAS_MANUTENCAO}
+    <CrudPage embedded table="manutencoes_orto" singular="manutenção" feminino fields={campos} columns={COLUNAS_MANUTENCAO}
       order={ORDEM_MANUT} query={porPlano} beforeSave={comPlano} />
   )
 }
