@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 
 export async function POST(request) {
   try {
-    const { nome_clinica, email, password } = await request.json()
+    const { nome_clinica, email, password, user_id } = await request.json()
 
     if (!nome_clinica || !email || !password) {
       return NextResponse.json(
@@ -18,55 +18,51 @@ export async function POST(request) {
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    // 1. Criar conta de autenticação
-    const { data: authData, error: authError } = await admin.auth.signUpWithPassword({
-      email,
-      password
-    })
+    // Se user_id foi passado, criar clínica e perfil para usuário existente
+    if (user_id) {
+      // 1. Criar clínica
+      const { data: clinicaData, error: clinicaError } = await admin
+        .from('clinicas')
+        .insert([{ nome: nome_clinica }])
+        .select()
+        .single()
 
-    if (authError) {
-      return NextResponse.json(
-        { error: 'Erro ao criar conta: ' + authError.message },
-        { status: 400 }
-      )
-    }
+      if (clinicaError) {
+        return NextResponse.json(
+          { error: 'Erro ao criar clínica: ' + clinicaError.message },
+          { status: 400 }
+        )
+      }
 
-    // 2. Criar clínica
-    const { data: clinicaData, error: clinicaError } = await admin
-      .from('clinicas')
-      .insert([{ nome: nome_clinica }])
-      .select()
-      .single()
+      // 2. Criar perfil de admin
+      const { error: perfilError } = await admin
+        .from('perfis')
+        .insert([{
+          clinica_id: clinicaData.id,
+          user_id: user_id,
+          nome: email.split('@')[0],
+          email,
+          role: 'admin'
+        }])
 
-    if (clinicaError) {
-      return NextResponse.json(
-        { error: 'Erro ao criar clínica: ' + clinicaError.message },
-        { status: 400 }
-      )
-    }
+      if (perfilError) {
+        return NextResponse.json(
+          { error: 'Erro ao criar perfil: ' + perfilError.message },
+          { status: 400 }
+        )
+      }
 
-    // 3. Criar perfil de admin
-    const { error: perfilError } = await admin
-      .from('perfis')
-      .insert([{
+      return NextResponse.json({
+        success: true,
         clinica_id: clinicaData.id,
-        user_id: authData.user.id,
-        nome: email.split('@')[0],
-        email,
-        role: 'admin'
-      }])
-
-    if (perfilError) {
-      return NextResponse.json(
-        { error: 'Erro ao criar perfil: ' + perfilError.message },
-        { status: 400 }
-      )
+        message: 'Clínica criada com sucesso'
+      })
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'Conta criada com sucesso'
-    })
+    return NextResponse.json(
+      { error: 'user_id é obrigatório' },
+      { status: 400 }
+    )
 
   } catch (err) {
     console.error('Signup error:', err)
