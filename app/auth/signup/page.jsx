@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClientServer } from '@/lib/supabase/server'
 import Link from 'next/link'
 
 export default async function SignupPage() {
@@ -20,6 +20,7 @@ export default async function SignupPage() {
     }
 
     const supabase = await createClient()
+    const admin = createAdminClientServer()
 
     // Criar conta de autenticação
     const { data: authData, error: authError } = await supabase.auth.signUpWithPassword({
@@ -31,8 +32,8 @@ export default async function SignupPage() {
       return { error: authError.message }
     }
 
-    // Criar clínica
-    const { data: clinica, error: clinicaError } = await supabase
+    // Criar clínica com SERVICE_ROLE
+    const { data: clinica, error: clinicaError } = await admin
       .from('clinicas')
       .insert([{ nome: nome_clinica }])
       .select()
@@ -42,8 +43,8 @@ export default async function SignupPage() {
       return { error: 'Erro ao criar clínica: ' + clinicaError.message }
     }
 
-    // Criar perfil de admin
-    const { error: perfilError } = await supabase
+    // Criar perfil de admin com SERVICE_ROLE
+    const { error: perfilError } = await admin
       .from('perfis')
       .insert([{
         clinica_id: clinica.id,
