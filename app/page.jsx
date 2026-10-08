@@ -16,8 +16,7 @@ const RECURSOS = [
 export default function Home() {
   return (
     <div className="min-h-screen bg-white">
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5 sm:px-6">
-        <Logo />
+      <header className="mx-auto flex max-w-6xl items-center justify-end px-4 py-5 sm:px-6">
         <nav className="flex items-center gap-2">
           <Link href="/auth/login" className="btn-ghost">Entrar</Link>
           <Link href="/auth/signup" className="btn-primary">Criar conta</Link>
@@ -26,7 +25,8 @@ export default function Home() {
 
       <section className="relative overflow-hidden">
         <div className="absolute inset-x-0 top-0 -z-10 h-[520px] bg-gradient-to-b from-brand-50 to-white" />
-        <div className="mx-auto max-w-4xl px-4 pb-16 pt-16 text-center sm:px-6 sm:pt-24">
+        <div className="mx-auto max-w-4xl px-4 pb-16 pt-4 text-center sm:px-6 sm:pt-8">
+          <div className="mb-8 flex justify-center"><Logo size="xl" /></div>
           <span className="inline-flex items-center rounded-full border border-brand-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wider text-brand-600">
             Gestão odontológica e ortodôntica
           </span>

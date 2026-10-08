@@ -42,7 +42,7 @@ export default function Sidebar() {
   const nav = (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between px-5 py-5 lg:justify-center">
-        <Logo light size="md" />
+        <Logo light size="lg" />
         <button className="rounded-md p-1 text-brand-100 lg:hidden" onClick={() => setOpen(false)} aria-label="Fechar menu">
           <X className="h-5 w-5" />
         </button>
@@ -76,9 +76,9 @@ export default function Sidebar() {
 
   return (
     <>
-      <header className="no-print sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 lg:hidden">
+      <header className="no-print sticky top-0 z-30 flex items-center justify-center border-b border-slate-200 bg-white px-4 py-2 lg:hidden">
         <Logo size="sm" />
-        <button onClick={() => setOpen(true)} className="rounded-md p-2 text-slate-600 hover:bg-slate-100" aria-label="Abrir menu">
+        <button onClick={() => setOpen(true)} className="absolute right-3 rounded-md p-2 text-slate-600 hover:bg-slate-100" aria-label="Abrir menu">
           <Menu className="h-5 w-5" />
         </button>
       </header>
