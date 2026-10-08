@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
 
 export default function SignupPage() {
   const [loading, setLoading] = useState(false)
@@ -39,58 +38,17 @@ export default function SignupPage() {
         return
       }
 
-      const supabase = await createClient()
-
-      // 1. Criar conta de autenticação
-      const { data: authData, error: authError } = await supabase.auth.signUpWithPassword({
-        email,
-        password,
+      // Chamar API route
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome_clinica, email, password })
       })
 
-      if (authError) {
-        setError('Erro de autenticação: ' + authError.message)
-        setLoading(false)
-        return
-      }
+      const data = await response.json()
 
-      // 2. Criar clínica
-      const { data: clinicaData, error: clinicaError } = await supabase
-        .from('clinicas')
-        .insert([{ nome: nome_clinica }])
-        .select()
-        .single()
-
-      if (clinicaError) {
-        setError('Erro ao criar clínica: ' + clinicaError.message)
-        setLoading(false)
-        return
-      }
-
-      // 3. Criar perfil de admin
-      const { error: perfilError } = await supabase
-        .from('perfis')
-        .insert([{
-          clinica_id: clinicaData.id,
-          user_id: authData.user.id,
-          nome: email.split('@')[0],
-          email,
-          role: 'admin'
-        }])
-
-      if (perfilError) {
-        setError('Erro ao criar perfil: ' + perfilError.message)
-        setLoading(false)
-        return
-      }
-
-      // 4. Login automático
-      const { error: loginError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-
-      if (loginError) {
-        setError('Erro ao fazer login: ' + loginError.message)
+      if (!response.ok) {
+        setError(data.error || 'Erro ao criar conta')
         setLoading(false)
         return
       }
@@ -98,7 +56,6 @@ export default function SignupPage() {
       setSuccess(true)
       setError('')
 
-      // Redirecionar após 2s
       setTimeout(() => {
         window.location.href = '/dashboard'
       }, 2000)
