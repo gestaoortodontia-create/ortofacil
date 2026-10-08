@@ -1,4 +1,4 @@
-import { createAdminClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
 export async function POST(request) {
@@ -12,16 +12,16 @@ export async function POST(request) {
       )
     }
 
-    const admin = createAdminClient(
+    const admin = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
     // 1. Criar conta de autenticação
-    const { data: authData, error: authError } = await admin.auth.admin.createUser({
+    const { data: authData, error: authError } = await admin.auth.signUpWithPassword({
       email,
-      password,
-      email_confirm: true
+      password
     })
 
     if (authError) {
