@@ -55,7 +55,6 @@ export async function POST(request) {
         clinica_id: clinicaData.id,
         user_id: authData.user.id,
         nome: email.split('@')[0],
-        email,
         role: 'admin'
       }])
 
