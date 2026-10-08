@@ -1,6 +1,5 @@
-import type { Metadata } from 'next'
 import './globals.css'
-export const metadata: Metadata = { title: 'OrthoFácil - Gestão Ortodôntica', description: 'Sistema completo de gestão para clínicas ortodônticas' }
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export const metadata = { title: 'OrthoFácil - Gestão Ortodôntica', description: 'Sistema completo de gestão para clínicas ortodônticas' }
+export default function RootLayout({ children }) {
   return (<html lang="pt-BR"><body className="antialiased">{children}</body></html>)
 }
