@@ -41,15 +41,15 @@ export default function Sidebar() {
 
   const nav = (
     <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between px-5 py-5">
-        <Logo light />
+      <div className="flex items-center justify-between px-5 py-5 lg:justify-center">
+        <Logo light size="md" />
         <button className="rounded-md p-1 text-brand-100 lg:hidden" onClick={() => setOpen(false)} aria-label="Fechar menu">
           <X className="h-5 w-5" />
         </button>
       </div>
       <div className="mx-4 mb-4 rounded-lg bg-white/5 px-3 py-2.5">
         <p className="truncate text-sm font-semibold text-white">{clinica.nome}</p>
-        <p className="truncate text-xs text-brand-100/70">{perfil.nome || email} · {perfil.papel}</p>
+        <p className="truncate text-xs text-brand-100/70">{perfil.nome || email}</p>
       </div>
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-3">
         {MENU.map(({ href, label, icon: Icon }) => (
@@ -77,7 +77,7 @@ export default function Sidebar() {
   return (
     <>
       <header className="no-print sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 lg:hidden">
-        <Logo />
+        <Logo size="sm" />
         <button onClick={() => setOpen(true)} className="rounded-md p-2 text-slate-600 hover:bg-slate-100" aria-label="Abrir menu">
           <Menu className="h-5 w-5" />
         </button>

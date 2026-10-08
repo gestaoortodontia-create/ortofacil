@@ -10,7 +10,7 @@ const RECURSOS = [
   { icon: FileSignature, titulo: 'Contratos', texto: 'Modelos padrão de serviços e de ortodontia, prontos para imprimir.' },
   { icon: Wallet, titulo: 'Financeiro', texto: 'Contas a receber e a pagar, pagamentos e inadimplência.' },
   { icon: Package, titulo: 'Estoque', texto: 'Materiais, entradas, saídas e alerta de estoque mínimo.' },
-  { icon: ShieldCheck, titulo: 'Seguro e LGPD', texto: 'Dados isolados por clínica, com acesso restrito à sua equipe.' },
+  { icon: ShieldCheck, titulo: 'Seguro e LGPD', texto: 'Cada login é independente: só você vê o que cadastrou.' },
 ]
 
 export default function Home() {

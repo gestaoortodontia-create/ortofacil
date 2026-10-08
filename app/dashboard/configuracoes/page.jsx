@@ -1,13 +1,13 @@
 'use client'
 
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useState } from 'react'
+import { ShieldCheck } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useClinica } from '@/components/ClinicaProvider'
 import CrudPage from '@/components/CrudPage'
 import RecordForm from '@/components/RecordForm'
-import { Alert, Badge, PageHeader, Spinner, Tabs } from '@/components/ui'
-import { PAPEIS, statusInfo } from '@/lib/opcoes'
+import { Alert, Badge, Field, PageHeader, Spinner, Tabs } from '@/components/ui'
 import { agoraLocal, moeda, traduzErro } from '@/lib/format'
 
 const CAMPOS_CLINICA = [
@@ -67,25 +67,57 @@ function DadosClinica() {
   )
 }
 
-function Equipe() {
-  const { clinica, userId } = useClinica()
-  const [lista, setLista] = useState(null)
-  useEffect(() => {
-    createClient().from('perfis').select('id, nome, papel, user_id, criado_em').eq('clinica_id', clinica.id).order('criado_em')
-      .then(({ data }) => setLista(data || []))
-  }, [clinica.id])
-  if (!lista) return <Spinner />
+function MinhaConta() {
+  const { perfil, email } = useClinica()
+  const router = useRouter()
+  const [nome, setNome] = useState(perfil.nome || '')
+  const [senha, setSenha] = useState({ nova: '', confirmar: '' })
+  const [msg, setMsg] = useState({ type: 'success', text: '' })
+  const [salvando, setSalvando] = useState('')
+
+  const salvarNome = async (e) => {
+    e.preventDefault()
+    setSalvando('nome')
+    const { error } = await createClient().from('perfis').update({ nome: nome.trim() }).eq('id', perfil.id)
+    setSalvando('')
+    setMsg(error ? { type: 'error', text: traduzErro(error) } : { type: 'success', text: 'Nome atualizado.' })
+    if (!error) router.refresh()
+  }
+
+  const trocarSenha = async (e) => {
+    e.preventDefault()
+    if (senha.nova.length < 8) return setMsg({ type: 'error', text: 'A nova senha deve ter pelo menos 8 caracteres.' })
+    if (senha.nova !== senha.confirmar) return setMsg({ type: 'error', text: 'As senhas não coincidem.' })
+    setSalvando('senha')
+    const { error } = await createClient().auth.updateUser({ password: senha.nova })
+    setSalvando('')
+    setMsg(error ? { type: 'error', text: traduzErro(error) } : { type: 'success', text: 'Senha alterada.' })
+    if (!error) setSenha({ nova: '', confirmar: '' })
+  }
+
   return (
-    <div className="card max-w-3xl overflow-hidden">
-      <ul className="divide-y divide-slate-100">
-        {lista.map((p) => (
-          <li key={p.id} className="flex items-center justify-between px-5 py-3">
-            <span className="text-sm font-medium text-slate-900">{p.nome || 'Sem nome'}{p.user_id === userId && <span className="ml-2 text-xs text-slate-500">(você)</span>}</span>
-            <Badge color="brand">{statusInfo(PAPEIS, p.papel).label}</Badge>
-          </li>
-        ))}
-      </ul>
-      <p className="border-t border-slate-100 px-5 py-3 text-xs text-slate-500">Cada usuário enxerga apenas os dados desta clínica.</p>
+    <div className="max-w-3xl space-y-6">
+      <div className="flex items-start gap-3 rounded-lg border border-brand-200 bg-brand-50 p-4 text-sm text-brand-800">
+        <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-brand-500" />
+        <span>Este login é independente: tudo o que você cadastra (pacientes, agenda, financeiro, contratos, fotos) é visível <strong>somente</strong> com este e-mail e senha. Nenhum outro usuário do sistema tem acesso.</span>
+      </div>
+      {msg.text && <Alert type={msg.type}>{msg.text}</Alert>}
+      <form onSubmit={salvarNome} className="card space-y-4 p-6">
+        <h3 className="font-semibold text-slate-900">Dados de acesso</h3>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="E-mail de login"><input className="input" value={email} disabled /></Field>
+          <Field label="Seu nome"><input className="input" value={nome} onChange={(e) => setNome(e.target.value)} required /></Field>
+        </div>
+        <div className="flex justify-end"><button type="submit" disabled={salvando === 'nome'} className="btn-primary">{salvando === 'nome' ? 'Salvando...' : 'Salvar nome'}</button></div>
+      </form>
+      <form onSubmit={trocarSenha} className="card space-y-4 p-6">
+        <h3 className="font-semibold text-slate-900">Alterar senha</h3>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Nova senha"><input type="password" autoComplete="new-password" className="input" value={senha.nova} onChange={(e) => setSenha({ ...senha, nova: e.target.value })} placeholder="Mín. 8 caracteres" /></Field>
+          <Field label="Confirmar nova senha"><input type="password" autoComplete="new-password" className="input" value={senha.confirmar} onChange={(e) => setSenha({ ...senha, confirmar: e.target.value })} /></Field>
+        </div>
+        <div className="flex justify-end"><button type="submit" disabled={salvando === 'senha'} className="btn-primary">{salvando === 'senha' ? 'Alterando...' : 'Alterar senha'}</button></div>
+      </form>
     </div>
   )
 }
@@ -98,9 +130,9 @@ function Conteudo() {
 
   return (
     <div>
-      <PageHeader title="Configurações" subtitle="Dados da clínica, profissionais, tabela de procedimentos e equipe." />
+      <PageHeader title="Configurações" subtitle="Dados da clínica, profissionais, tabela de procedimentos e sua conta." />
       <Tabs
-        tabs={[{ id: 'clinica', label: 'Clínica' }, { id: 'profissionais', label: 'Profissionais' }, { id: 'procedimentos', label: 'Procedimentos' }, { id: 'equipe', label: 'Equipe' }]}
+        tabs={[{ id: 'clinica', label: 'Clínica' }, { id: 'profissionais', label: 'Profissionais' }, { id: 'procedimentos', label: 'Procedimentos' }, { id: 'conta', label: 'Minha conta' }]}
         active={tab}
         onChange={setTab}
       />
@@ -111,7 +143,7 @@ function Conteudo() {
       {tab === 'procedimentos' && (
         <CrudPage embedded table="procedimentos" singular="procedimento" fields={CAMPOS_PROCEDIMENTO} columns={COLS_PROCEDIMENTO} order={ORDEM_NOME} searchFields={['nome', 'categoria']} />
       )}
-      {tab === 'equipe' && <Equipe />}
+      {tab === 'conta' && <MinhaConta />}
     </div>
   )
 }

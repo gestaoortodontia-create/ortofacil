@@ -16,9 +16,9 @@ Sistema de gestão para clínicas odontológicas e ortodônticas. Roda inteirame
 | Financeiro | Contas a receber, pagamentos parciais, recebimentos do mês, contas a pagar |
 | Estoque | Materiais, entradas/saídas/ajustes e alerta de estoque mínimo |
 | Relatórios | Faturamento dos últimos 6 meses, consultas por status, faltas, inadimplência |
-| Configurações | Dados da clínica, profissionais, procedimentos e equipe |
+| Configurações | Dados da clínica, profissionais, procedimentos, nome e troca de senha |
 
-Cada clínica só enxerga os próprios dados (Row Level Security no Postgres).
+**Regra de negócio:** cada login (e-mail e senha) é totalmente independente. Ao se cadastrar, o usuário recebe uma clínica exclusiva, e o banco (Row Level Security no Postgres) só entrega a cada login o que foi cadastrado por ele. Não há compartilhamento de dados entre logins.
 
 ## Configuração do Supabase (uma vez)
 
