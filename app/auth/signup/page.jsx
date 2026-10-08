@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
 
 export default function SignupPage() {
   const [loading, setLoading] = useState(false)
@@ -39,36 +38,17 @@ export default function SignupPage() {
         return
       }
 
-      const supabase = createClient()
-
-      // 1. Signup no Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUpWithPassword({
-        email,
-        password
-      })
-
-      if (authError) {
-        setError('Erro ao criar conta: ' + authError.message)
-        setLoading(false)
-        return
-      }
-
-      // 2. Criar clínica e perfil via API
-      const response = await fetch('/api/auth/signup', {
+      // Chamar apenas API - deixa o servidor fazer tudo
+      const response = await fetch('/api/auth/complete-signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nome_clinica,
-          email,
-          password,
-          user_id: authData.user.id
-        })
+        body: JSON.stringify({ nome_clinica, email, password })
       })
 
-      const apiData = await response.json()
+      const data = await response.json()
 
       if (!response.ok) {
-        setError(apiData.error || 'Erro ao criar clínica')
+        setError(data.error || 'Erro ao criar conta')
         setLoading(false)
         return
       }
