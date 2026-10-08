@@ -48,14 +48,13 @@ export async function POST(request) {
       )
     }
 
-    // 3. Criar perfil
+    // 3. Criar perfil (apenas campos obrigatórios)
     const { error: perfilError } = await admin
       .from('perfis')
       .insert([{
         clinica_id: clinicaData.id,
         user_id: authData.user.id,
-        nome: email.split('@')[0],
-        role: 'admin'
+        nome: email.split('@')[0]
       }])
 
     if (perfilError) {
