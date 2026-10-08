@@ -1,131 +1,53 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import { FolderOpen } from 'lucide-react'
+import CrudPage from '@/components/CrudPage'
+import { agoraLocal, data, idade } from '@/lib/format'
+import { CAMPOS_PACIENTE } from './campos'
+
+const COLUNAS = [
+  {
+    key: 'nome',
+    label: 'Paciente',
+    render: (p) => (
+      <Link href={`/dashboard/pacientes/${p.id}`} className="font-medium text-slate-900 hover:text-brand-600">
+        {p.nome}
+        {p.data_nascimento && <span className="block text-xs font-normal text-slate-500">{idade(p.data_nascimento)} anos · {data(p.data_nascimento)}</span>}
+      </Link>
+    ),
+  },
+  { key: 'cpf', label: 'CPF' },
+  { key: 'telefone', label: 'Telefone' },
+  { key: 'nome_convenio', label: 'Convênio', render: (p) => (p.conveniado ? p.nome_convenio || 'Sim' : 'Particular') },
+]
+
+const ORDEM = { column: 'nome', ascending: true }
+
+const beforeSave = (p, anterior) => {
+  if (p.consentimento_lgpd && !anterior?.consentimento_lgpd) p.data_consentimento = agoraLocal()
+  if (!p.consentimento_lgpd) p.data_consentimento = null
+  return p
+}
 
 export default function PacientesPage() {
-  const [pacientes, setPacientes] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [showForm, setShowForm] = useState(false)
-
-  useEffect(() => {
-    loadPacientes()
-  }, [])
-
-  const loadPacientes = async () => {
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) return
-
-    const { data: perfil } = await supabase
-      .from('perfis')
-      .select('clinica_id')
-      .eq('user_id', user.id)
-      .single()
-
-    if (!perfil) return
-
-    const { data } = await supabase
-      .from('pacientes')
-      .select('*')
-      .eq('clinica_id', perfil.clinica_id)
-      .order('created_at', { ascending: false })
-
-    setPacientes(data || [])
-    setLoading(false)
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    const formData = new FormData(e.target)
-
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    const { data: perfil } = await supabase
-      .from('perfis')
-      .select('clinica_id')
-      .eq('user_id', user.id)
-      .single()
-
-    const { error } = await supabase
-      .from('pacientes')
-      .insert([{
-        clinica_id: perfil.clinica_id,
-        nome: formData.get('nome'),
-        cpf: formData.get('cpf'),
-        email: formData.get('email'),
-        telefone: formData.get('telefone'),
-        data_nascimento: formData.get('data_nascimento'),
-      }])
-
-    if (!error) {
-      setShowForm(false)
-      loadPacientes()
-    }
-  }
-
   return (
-    <div>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Pacientes</h1>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-        >
-          {showForm ? 'Cancelar' : '+ Novo Paciente'}
-        </button>
-      </div>
-
-      {showForm && (
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6 mb-8">
-          <div className="grid grid-cols-2 gap-4">
-            <input type="text" name="nome" placeholder="Nome" required className="border rounded p-2" />
-            <input type="text" name="cpf" placeholder="CPF" className="border rounded p-2" />
-            <input type="email" name="email" placeholder="Email" className="border rounded p-2" />
-            <input type="tel" name="telefone" placeholder="Telefone" className="border rounded p-2" />
-            <input type="date" name="data_nascimento" className="border rounded p-2" />
-          </div>
-          <button type="submit" className="mt-4 bg-green-600 text-white px-4 py-2 rounded">
-            Salvar
-          </button>
-        </form>
+    <CrudPage
+      table="pacientes"
+      title="Pacientes"
+      subtitle="Cadastro completo dos pacientes da clínica."
+      singular="paciente"
+      fields={CAMPOS_PACIENTE}
+      columns={COLUNAS}
+      order={ORDEM}
+      searchFields={['nome', 'cpf', 'telefone', 'email']}
+      beforeSave={beforeSave}
+      emptyText="Cadastre o primeiro paciente para começar a usar a agenda e o prontuário."
+      rowActions={(p) => (
+        <Link href={`/dashboard/pacientes/${p.id}`} className="rounded-md p-1.5 text-slate-500 hover:bg-brand-50 hover:text-brand-700" title="Abrir prontuário">
+          <FolderOpen className="h-4 w-4" />
+        </Link>
       )}
-
-      {loading ? (
-        <div>Carregando...</div>
-      ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Nome</th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">CPF</th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Email</th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Telefone</th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pacientes.map((p) => (
-                <tr key={p.id} className="border-b hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm">{p.nome}</td>
-                  <td className="px-6 py-4 text-sm">{p.cpf || '-'}</td>
-                  <td className="px-6 py-4 text-sm">{p.email || '-'}</td>
-                  <td className="px-6 py-4 text-sm">{p.telefone || '-'}</td>
-                  <td className="px-6 py-4 text-sm">
-                    <Link href={`/dashboard/pacientes/${p.id}`} className="text-blue-600 hover:underline">
-                      Ver
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
+    />
   )
 }

@@ -1,199 +1,63 @@
-'use client'
+import Link from 'next/link'
+import { CalendarDays, ClipboardList, Smile, FileSignature, Wallet, Package, ShieldCheck, Camera } from 'lucide-react'
+import Logo from '@/components/Logo'
+
+const RECURSOS = [
+  { icon: CalendarDays, titulo: 'Agenda', texto: 'Consultas por dia e profissional, com status de confirmação e faltas.' },
+  { icon: ClipboardList, titulo: 'Prontuário', texto: 'Anamnese, evoluções, prescrições e odontograma de cada paciente.' },
+  { icon: Smile, titulo: 'Ortodontia', texto: 'Planos de tratamento e histórico de manutenções, arcos e elásticos.' },
+  { icon: Camera, titulo: 'Fotos comprimidas', texto: 'Fotos do tratamento otimizadas no navegador antes do envio.' },
+  { icon: FileSignature, titulo: 'Contratos', texto: 'Modelos padrão de serviços e de ortodontia, prontos para imprimir.' },
+  { icon: Wallet, titulo: 'Financeiro', texto: 'Contas a receber e a pagar, pagamentos e inadimplência.' },
+  { icon: Package, titulo: 'Estoque', texto: 'Materiais, entradas, saídas e alerta de estoque mínimo.' },
+  { icon: ShieldCheck, titulo: 'Seguro e LGPD', texto: 'Dados isolados por clínica, com acesso restrito à sua equipe.' },
+]
 
 export default function Home() {
-  const containerStyle = {
-    minHeight: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: 'linear-gradient(135deg, #f5f7fa 0%, #e8f1f5 100%)',
-    padding: '1rem',
-    fontFamily: "'Segoe UI', 'Helvetica Neue', sans-serif"
-  };
-
-  const cardStyle = {
-    background: 'white',
-    borderRadius: '1.5rem',
-    padding: '3rem',
-    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.08)',
-    border: 'none',
-    maxWidth: '32rem',
-    width: '100%'
-  };
-
-  const headerStyle = {
-    textAlign: 'center',
-    marginBottom: '2.5rem'
-  };
-
-  const logoStyle = {
-    fontSize: '3rem',
-    marginBottom: '1rem',
-    display: 'inline-block'
-  };
-
-  const titleStyle = {
-    fontSize: '2.5rem',
-    fontWeight: '700',
-    color: '#1A533C',
-    marginBottom: '0.5rem',
-    letterSpacing: '-0.5px'
-  };
-
-  const subtitleStyle = {
-    fontSize: '0.95rem',
-    color: '#4ECDC4',
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: '1px'
-  };
-
-  const dividerStyle = {
-    height: '4px',
-    background: 'linear-gradient(to right, #1A533C, #4ECDC4)',
-    borderRadius: '2px',
-    width: '60px',
-    margin: '1.5rem auto',
-  };
-
-  const featureGridStyle = {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: '1rem',
-    marginBottom: '2.5rem'
-  };
-
-  const featureItemStyle = {
-    textAlign: 'center',
-    padding: '1.25rem',
-    background: '#f5f7fa',
-    borderRadius: '1rem',
-    transition: 'all 0.3s',
-    cursor: 'pointer'
-  };
-
-  const featureIconStyle = {
-    fontSize: '2.5rem',
-    marginBottom: '0.5rem'
-  };
-
-  const featureNameStyle = {
-    fontSize: '0.85rem',
-    color: '#1A533C',
-    fontWeight: '600'
-  };
-
-  const buttonsContainerStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1rem',
-    marginBottom: '2rem'
-  };
-
-  const buttonPrimaryStyle = {
-    width: '100%',
-    padding: '1rem 1.5rem',
-    background: 'linear-gradient(135deg, #1A533C 0%, #2C6E7F 100%)',
-    color: 'white',
-    fontWeight: '700',
-    borderRadius: '1rem',
-    textAlign: 'center',
-    textDecoration: 'none',
-    display: 'block',
-    border: 'none',
-    cursor: 'pointer',
-    fontSize: '1rem',
-    transition: 'all 0.3s',
-    boxShadow: '0 10px 30px rgba(26, 83, 60, 0.15)'
-  };
-
-  const buttonSecondaryStyle = {
-    width: '100%',
-    padding: '1rem 1.5rem',
-    background: 'white',
-    color: '#1A533C',
-    fontWeight: '700',
-    borderRadius: '1rem',
-    textAlign: 'center',
-    textDecoration: 'none',
-    display: 'block',
-    border: '2px solid #4ECDC4',
-    cursor: 'pointer',
-    fontSize: '1rem',
-    transition: 'all 0.3s',
-    boxShadow: '0 10px 30px rgba(78, 205, 196, 0.1)'
-  };
-
-  const footerStyle = {
-    textAlign: 'center',
-    paddingTop: '1.5rem',
-    borderTop: '1px solid #e8f1f5',
-    fontSize: '0.85rem',
-    color: '#6b7280'
-  };
-
   return (
-    <div style={containerStyle}>
-      <div style={cardStyle}>
-        <div style={headerStyle}>
-          <div style={logoStyle}>🦷</div>
-          <h1 style={titleStyle}>ORTOFÁCIL</h1>
-          <p style={subtitleStyle}>Sistema Odontológico Inteligente</p>
-          <div style={dividerStyle}></div>
-        </div>
+    <div className="min-h-screen bg-white">
+      <header className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5 sm:px-6">
+        <Logo />
+        <nav className="flex items-center gap-2">
+          <Link href="/auth/login" className="btn-ghost">Entrar</Link>
+          <Link href="/auth/signup" className="btn-primary">Criar conta</Link>
+        </nav>
+      </header>
 
-        <div style={featureGridStyle}>
-          <div style={featureItemStyle} onMouseEnter={(e) => e.currentTarget.style.background = '#e8f1f5'} onMouseLeave={(e) => e.currentTarget.style.background = '#f5f7fa'}>
-            <div style={featureIconStyle}>📊</div>
-            <p style={featureNameStyle}>Dashboard</p>
-          </div>
-          <div style={featureItemStyle} onMouseEnter={(e) => e.currentTarget.style.background = '#e8f1f5'} onMouseLeave={(e) => e.currentTarget.style.background = '#f5f7fa'}>
-            <div style={featureIconStyle}>👥</div>
-            <p style={featureNameStyle}>Pacientes</p>
-          </div>
-          <div style={featureItemStyle} onMouseEnter={(e) => e.currentTarget.style.background = '#e8f1f5'} onMouseLeave={(e) => e.currentTarget.style.background = '#f5f7fa'}>
-            <div style={featureIconStyle}>📅</div>
-            <p style={featureNameStyle}>Agenda</p>
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-x-0 top-0 -z-10 h-[520px] bg-gradient-to-b from-brand-50 to-white" />
+        <div className="mx-auto max-w-4xl px-4 pb-16 pt-16 text-center sm:px-6 sm:pt-24">
+          <span className="inline-flex items-center rounded-full border border-brand-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wider text-brand-600">
+            Gestão odontológica e ortodôntica
+          </span>
+          <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
+            Sua clínica organizada,<br className="hidden sm:block" /> <span className="text-brand-600">do agendamento ao contrato.</span>
+          </h1>
+          <p className="mx-auto mt-5 max-w-2xl text-lg text-slate-600">
+            O OrtoFácil reúne agenda, prontuário, ortodontia, orçamentos, financeiro, estoque e contratos em um sistema simples, feito para o dia a dia do consultório.
+          </p>
+          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+            <Link href="/auth/signup" className="btn-primary px-6 py-3 text-base">Cadastrar minha clínica</Link>
+            <Link href="/auth/login" className="btn-secondary px-6 py-3 text-base">Já tenho conta</Link>
           </div>
         </div>
+      </section>
 
-        <div style={buttonsContainerStyle}>
-          <a
-            href="/auth/login"
-            style={buttonPrimaryStyle}
-            onMouseEnter={(e) => {
-              e.target.style.transform = 'translateY(-2px)';
-              e.target.style.boxShadow = '0 15px 40px rgba(26, 83, 60, 0.25)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = '0 10px 30px rgba(26, 83, 60, 0.15)';
-            }}
-          >
-            → Entrar
-          </a>
-          <a
-            href="/auth/signup"
-            style={buttonSecondaryStyle}
-            onMouseEnter={(e) => {
-              e.target.style.transform = 'translateY(-2px)';
-              e.target.style.background = '#4ECDC4';
-              e.target.style.color = 'white';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.background = 'white';
-              e.target.style.color = '#1A533C';
-            }}
-          >
-            + Criar Conta
-          </a>
+      <section className="mx-auto max-w-6xl px-4 pb-24 sm:px-6">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {RECURSOS.map(({ icon: Icon, titulo, texto }) => (
+            <div key={titulo} className="card p-6 transition hover:-translate-y-0.5 hover:shadow-md">
+              <div className="inline-flex rounded-lg bg-brand-50 p-2.5 text-brand-600"><Icon className="h-5 w-5" /></div>
+              <h3 className="mt-4 font-semibold text-slate-900">{titulo}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{texto}</p>
+            </div>
+          ))}
         </div>
+      </section>
 
-        <div style={footerStyle}>
-          <p style={{ margin: 0 }}>Gestão completa para sua clínica ortodôntica</p>
-        </div>
-      </div>
+      <footer className="border-t border-slate-200 py-8 text-center text-sm text-slate-500">
+        © {new Date().getFullYear()} OrtoFácil · Gestão completa para clínicas odontológicas
+      </footer>
     </div>
-  );
+  )
 }

@@ -2,166 +2,72 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+import { Alert, Field } from '@/components/ui'
+import AuthShell from '../AuthShell'
 
 export default function SignupPage() {
+  const router = useRouter()
+  const [form, setForm] = useState({ nome_clinica: '', nome: '', email: '', password: '', confirmar: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
-  const [formData, setFormData] = useState({
-    nome_clinica: '',
-    email: '',
-    password: '',
-    password_confirm: ''
-  })
+  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
-
-  const handleSignup = async (e) => {
+  const cadastrar = async (e) => {
     e.preventDefault()
     setError('')
+    if (form.password.length < 8) return setError('A senha deve ter pelo menos 8 caracteres.')
+    if (form.password !== form.confirmar) return setError('As senhas não coincidem.')
+
     setLoading(true)
-
     try {
-      const { nome_clinica, email, password, password_confirm } = formData
-
-      if (password !== password_confirm) {
-        setError('Senhas não coincidem')
-        setLoading(false)
-        return
-      }
-
-      if (password.length < 6) {
-        setError('Senha deve ter no mínimo 6 caracteres')
-        setLoading(false)
-        return
-      }
-
-      // Chamar apenas API - deixa o servidor fazer tudo
-      const response = await fetch('/api/auth/complete-signup', {
+      const res = await fetch('/api/cadastro', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nome_clinica, email, password })
+        body: JSON.stringify({ nome_clinica: form.nome_clinica, nome: form.nome, email: form.email, password: form.password }),
       })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(json.error || 'Não foi possível concluir o cadastro.')
 
-      const data = await response.json()
+      const { error } = await createClient().auth.signInWithPassword({ email: form.email.trim(), password: form.password })
+      if (error) throw new Error('Conta criada, mas o login automático falhou. Entre pela tela de login.')
 
-      if (!response.ok) {
-        setError(data.error || 'Erro ao criar conta')
-        setLoading(false)
-        return
-      }
-
-      setSuccess(true)
-      setError('')
-
-      setTimeout(() => {
-        window.location.href = '/dashboard'
-      }, 2000)
-
+      router.replace('/dashboard')
+      router.refresh()
     } catch (err) {
-      console.error('Signup error:', err)
-      setError('Erro: ' + (err?.message || 'desconhecido'))
+      setError(err.message)
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">OrthoFácil</h1>
-          <p className="text-gray-600 mt-2">Criar nova conta</p>
+    <AuthShell
+      title="Cadastre sua clínica"
+      subtitle="Crie o acesso de administrador. Leva menos de um minuto."
+      footer={<>Já tem conta? <Link href="/auth/login" className="font-semibold text-brand-600 hover:underline">Entrar</Link></>}
+    >
+      <form onSubmit={cadastrar} className="space-y-4">
+        <Field label="Nome da clínica" required>
+          <input required className="input" value={form.nome_clinica} onChange={set('nome_clinica')} placeholder="Clínica Sorriso" />
+        </Field>
+        <Field label="Seu nome" required>
+          <input required autoComplete="name" className="input" value={form.nome} onChange={set('nome')} placeholder="Dra. Ana Souza" />
+        </Field>
+        <Field label="E-mail" required>
+          <input type="email" required autoComplete="email" className="input" value={form.email} onChange={set('email')} placeholder="voce@clinica.com.br" />
+        </Field>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field label="Senha" required>
+            <input type="password" required minLength={8} autoComplete="new-password" className="input" value={form.password} onChange={set('password')} placeholder="Mín. 8 caracteres" />
+          </Field>
+          <Field label="Confirmar senha" required>
+            <input type="password" required autoComplete="new-password" className="input" value={form.confirmar} onChange={set('confirmar')} />
+          </Field>
         </div>
-
-        {success && (
-          <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-            ✅ Conta criada com sucesso! Redirecionando...
-          </div>
-        )}
-
-        {error && (
-          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
-            ❌ {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSignup} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Nome da Clínica</label>
-            <input
-              type="text"
-              name="nome_clinica"
-              value={formData.nome_clinica}
-              onChange={handleChange}
-              required
-              disabled={loading}
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
-              placeholder="Clínica Odonto Plus"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              disabled={loading}
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
-              placeholder="seu@email.com"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Senha</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              disabled={loading}
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
-              placeholder="••••••••"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Confirmar Senha</label>
-            <input
-              type="password"
-              name="password_confirm"
-              value={formData.password_confirm}
-              onChange={handleChange}
-              required
-              disabled={loading}
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
-              placeholder="••••••••"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white font-medium py-2 rounded-lg hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Criando conta...' : 'Criar Conta'}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center">
-          <p className="text-gray-600">
-            Já tem conta?{' '}
-            <Link href="/auth/login" className="text-blue-600 hover:underline font-medium">
-              Fazer login
-            </Link>
-          </p>
-        </div>
-      </div>
-    </div>
+        <Alert>{error}</Alert>
+        <button type="submit" disabled={loading} className="btn-primary w-full py-2.5">{loading ? 'Criando conta...' : 'Criar conta'}</button>
+      </form>
+    </AuthShell>
   )
 }

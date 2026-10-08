@@ -2,130 +2,48 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { Alert, Field } from '@/components/ui'
+import AuthShell from '../AuthShell'
 
 export default function LoginPage() {
+  const router = useRouter()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  })
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
-
-  const handleLogin = async (e) => {
+  const entrar = async (e) => {
     e.preventDefault()
-    setError('')
     setLoading(true)
-
-    try {
-      const { email, password } = formData
-
-      if (!email || !password) {
-        setError('Email e senha são obrigatórios')
-        setLoading(false)
-        return
-      }
-
-      const supabase = await createClient()
-
-      const { error: loginError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-
-      if (loginError) {
-        setError('Email ou senha inválidos')
-        setLoading(false)
-        return
-      }
-
-      setSuccess(true)
-      setError('')
-
-      // Redirecionar após 2s
-      setTimeout(() => {
-        window.location.href = '/dashboard'
-      }, 2000)
-
-    } catch (err) {
-      console.error('Login error:', err)
-      setError('Erro ao fazer login: ' + (err?.message || 'desconhecido'))
+    setError('')
+    const { error } = await createClient().auth.signInWithPassword({ email: email.trim(), password })
+    if (error) {
+      setError(/invalid/i.test(error.message) ? 'E-mail ou senha incorretos.' : error.message)
       setLoading(false)
+      return
     }
+    router.replace('/dashboard')
+    router.refresh()
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">OrthoFácil</h1>
-          <p className="text-gray-600 mt-2">Sistema de Gestão Ortodôntica</p>
-        </div>
-
-        {success && (
-          <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-            ✅ Login realizado com sucesso! Redirecionando...
-          </div>
-        )}
-
-        {error && (
-          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
-            ❌ {error}
-          </div>
-        )}
-
-        <form onSubmit={handleLogin} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              disabled={loading}
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
-              placeholder="seu@email.com"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Senha</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              disabled={loading}
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
-              placeholder="••••••••"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white font-medium py-2 rounded-lg hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Entrando...' : 'Entrar'}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center">
-          <p className="text-gray-600">
-            Não tem conta?{' '}
-            <Link href="/auth/signup" className="text-blue-600 hover:underline font-medium">
-              Criar conta
-            </Link>
-          </p>
-        </div>
-      </div>
-    </div>
+    <AuthShell
+      title="Entrar"
+      subtitle="Acesse o painel da sua clínica."
+      footer={<>Ainda não tem conta? <Link href="/auth/signup" className="font-semibold text-brand-600 hover:underline">Cadastre sua clínica</Link></>}
+    >
+      <form onSubmit={entrar} className="space-y-4">
+        <Field label="E-mail">
+          <input type="email" required autoComplete="email" className="input" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@clinica.com.br" />
+        </Field>
+        <Field label="Senha">
+          <input type="password" required autoComplete="current-password" className="input" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
+        </Field>
+        <Alert>{error}</Alert>
+        <button type="submit" disabled={loading} className="btn-primary w-full py-2.5">{loading ? 'Entrando...' : 'Entrar'}</button>
+      </form>
+    </AuthShell>
   )
 }

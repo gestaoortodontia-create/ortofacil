@@ -1,5 +1,17 @@
+import { Inter } from 'next/font/google'
 import './globals.css'
-export const metadata = { title: 'OrthoFácil - Gestão Ortodôntica', description: 'Sistema completo de gestão para clínicas ortodônticas' }
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
+
+export const metadata = {
+  title: 'OrtoFácil — Gestão Odontológica',
+  description: 'Agenda, prontuário, ortodontia, financeiro, estoque e contratos para clínicas odontológicas.',
+}
+
 export default function RootLayout({ children }) {
-  return (<html lang="pt-BR"><body className="antialiased">{children}</body></html>)
+  return (
+    <html lang="pt-BR" className={inter.variable}>
+      <body className="min-h-screen font-sans">{children}</body>
+    </html>
+  )
 }

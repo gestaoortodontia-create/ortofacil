@@ -1,0 +1,18 @@
+export const CAMPOS_PACIENTE = [
+  { name: 'nome', label: 'Nome completo', required: true, full: true },
+  { name: 'cpf', label: 'CPF', placeholder: '000.000.000-00' },
+  { name: 'rg', label: 'RG' },
+  { name: 'data_nascimento', label: 'Data de nascimento', type: 'date' },
+  { name: 'sexo', label: 'Sexo', type: 'select', options: ['Feminino', 'Masculino', 'Outro'] },
+  { name: 'telefone', label: 'Telefone / WhatsApp', type: 'tel' },
+  { name: 'email', label: 'E-mail', type: 'email' },
+  { name: 'endereco', label: 'Endereço completo', full: true },
+  { name: 'responsavel_nome', label: 'Responsável (se menor)' },
+  { name: 'responsavel_cpf', label: 'CPF do responsável' },
+  { name: 'responsavel_telefone', label: 'Telefone do responsável', type: 'tel' },
+  { name: 'conveniado', label: 'Possui convênio?', type: 'checkbox', checkboxLabel: 'Sim, é conveniado' },
+  { name: 'nome_convenio', label: 'Convênio' },
+  { name: 'numero_convenio', label: 'Nº da carteirinha' },
+  { name: 'consentimento_lgpd', label: 'Consentimento LGPD', type: 'checkbox', checkboxLabel: 'Paciente autorizou o tratamento de dados', full: true },
+  { name: 'notas', label: 'Observações', type: 'textarea' },
+]
