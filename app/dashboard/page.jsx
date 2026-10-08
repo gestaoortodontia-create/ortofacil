@@ -40,14 +40,16 @@ export default function PainelPage() {
     })
   }, [clinica.id])
 
-  const saudacao = (() => {
-    const h = new Date().getHours()
-    return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'
-  })()
+  // Calculado só no navegador: o servidor da Vercel roda em UTC e geraria outra saudação/data.
+  const [agora, setAgora] = useState(null)
+  useEffect(() => setAgora(new Date()), [])
+  const h = agora?.getHours()
+  const saudacao = h === undefined ? 'Olá' : h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'
+  const nome = primeiroNome(perfil.nome)
 
   return (
     <div>
-      <PageHeader title={`${saudacao}${primeiroNome(perfil.nome) ? `, ${primeiroNome(perfil.nome)}` : ''}!`} subtitle={new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}>
+      <PageHeader title={`${saudacao}${nome ? `, ${nome}` : ''}!`} subtitle={agora ? agora.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : ' '}>
         <Link href="/dashboard/agenda" className="btn-primary"><CalendarDays className="h-4 w-4" /> Abrir agenda</Link>
       </PageHeader>
 
