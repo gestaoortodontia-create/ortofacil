@@ -10,55 +10,60 @@ export default async function SignupPage() {
 
   async function handleSignup(formData) {
     'use server'
-    const nome_clinica = formData.get('nome_clinica')
-    const email = formData.get('email')
-    const password = formData.get('password')
-    const password_confirm = formData.get('password_confirm')
+    try {
+      const nome_clinica = formData.get('nome_clinica')
+      const email = formData.get('email')
+      const password = formData.get('password')
+      const password_confirm = formData.get('password_confirm')
 
-    if (password !== password_confirm) {
-      return { error: 'Senhas não coincidem' }
-    }
+      if (password !== password_confirm) {
+        return { error: 'Senhas não coincidem' }
+      }
 
-    const supabase = await createClient()
-    const admin = createAdminClientServer()
+      const supabase = await createClient()
+      const admin = createAdminClientServer()
 
-    // Criar conta de autenticação
-    const { data: authData, error: authError } = await supabase.auth.signUpWithPassword({
-      email,
-      password,
-    })
-
-    if (authError) {
-      return { error: authError.message }
-    }
-
-    // Criar clínica com SERVICE_ROLE
-    const { data: clinica, error: clinicaError } = await admin
-      .from('clinicas')
-      .insert([{ nome: nome_clinica }])
-      .select()
-      .single()
-
-    if (clinicaError) {
-      return { error: 'Erro ao criar clínica: ' + clinicaError.message }
-    }
-
-    // Criar perfil de admin com SERVICE_ROLE
-    const { error: perfilError } = await admin
-      .from('perfis')
-      .insert([{
-        clinica_id: clinica.id,
-        user_id: authData.user.id,
-        nome: email.split('@')[0],
+      // Criar conta de autenticação
+      const { data: authData, error: authError } = await supabase.auth.signUpWithPassword({
         email,
-        role: 'admin'
-      }])
+        password,
+      })
 
-    if (perfilError) {
-      return { error: 'Erro ao criar perfil: ' + perfilError.message }
+      if (authError) {
+        return { error: authError.message }
+      }
+
+      // Criar clínica com SERVICE_ROLE
+      const { data: clinica, error: clinicaError } = await admin
+        .from('clinicas')
+        .insert([{ nome: nome_clinica }])
+        .select()
+        .single()
+
+      if (clinicaError) {
+        return { error: 'Erro ao criar clínica: ' + clinicaError.message }
+      }
+
+      // Criar perfil de admin com SERVICE_ROLE
+      const { error: perfilError } = await admin
+        .from('perfis')
+        .insert([{
+          clinica_id: clinica.id,
+          user_id: authData.user.id,
+          nome: email.split('@')[0],
+          email,
+          role: 'admin'
+        }])
+
+      if (perfilError) {
+        return { error: 'Erro ao criar perfil: ' + perfilError.message }
+      }
+
+      redirect('/dashboard')
+    } catch (err) {
+      console.error('Signup error:', err)
+      return { error: 'Erro no servidor: ' + (err?.message || 'desconhecido') }
     }
-
-    redirect('/dashboard')
   }
 
   return (
