@@ -1,0 +1,26 @@
+# Supabase Configuration
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+max_rows = 1000
+
+[db]
+port = 5432
+major_version = 15
+
+[auth]
+enabled = true
+provider_skip_confirmation = false
+max_enrolled_factors = 2
+
+[storage]
+enabled = true
+file_size_limit = 52428800
+
+[realtime]
+enabled = true
+
+[edge_runtime]
+enabled = true
